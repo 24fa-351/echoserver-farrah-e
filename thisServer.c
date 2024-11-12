@@ -14,7 +14,7 @@ void initializingServer(int port){
     socklen_t client_address_size;
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket < 0) {
-        fprintf(stderr, "Error creating socket\n");
+        perror("Error creating socket\n");
         exit(EXIT_FAILURE);
     }
     printf("Socket created\n");
@@ -24,12 +24,13 @@ void initializingServer(int port){
     server_address.sin_port = htons(port);
     printf("Binding socket\n");
     if (bind(server_socket, (struct sockaddr *)&server_address, sizeof(server_address)) < 0) {
-        fprintf(stderr, "Error binding socket\n");
+        perror("Error binding socket\n");
+        close(server_socket);
         exit(EXIT_FAILURE);
     }
     printf("Socket bound\n");
     if (listen(server_socket, 1) < 0) {
-        fprintf(stderr, "Error listening on socket\n");
+        perror("Error listening on socket\n");
         close(server_socket);
         exit(EXIT_FAILURE);
     }
@@ -38,7 +39,7 @@ void initializingServer(int port){
         client_address_size = sizeof(client_address);
         client_socket = accept(server_socket, (struct sockaddr *)&client_address, &client_address_size);
         if (client_socket < 0) {
-            fprintf(stderr, "Error accepting client\n");
+            perror("Error accepting client\n");
             exit(EXIT_FAILURE);
         }
         printf("Client connected\n");
@@ -54,7 +55,13 @@ void client(int client_socket){
     ssize_t bytesreceived;
     while ((bytesreceived = recv(client_socket, buffer, buffer_size - 1, 0)) > 0) {
         buffer[bytesreceived] = '\0';
-        send(client_socket, buffer, bytesreceived, 0);
+        printf("Client sent: %s\n", buffer);
+        if(send(client_socket, buffer, bytesreceived, 0) < 0){
+            perror("Error sending message\n");
+            close(client_socket);
+            exit(EXIT_FAILURE);
+        }
+
     }
     close (client_socket);
 }

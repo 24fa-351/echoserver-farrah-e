@@ -5,8 +5,9 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include "thisServer.h"
+#define PORT 0;
 int main(int argc, char *argv[]) {
-    int port = 0;
+    int port = PORT;
     int opt;
     for (int currWordIndex = 1; currWordIndex < argc; currWordIndex++) {
         if (strcmp(argv[currWordIndex], "-p") == 0 && currWordIndex + 1 < argc) {
